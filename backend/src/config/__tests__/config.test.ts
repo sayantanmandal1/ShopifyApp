@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { config } from '../index';
 
 describe('Configuration Module', () => {
