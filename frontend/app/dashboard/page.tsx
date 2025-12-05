@@ -9,12 +9,18 @@ import CustomerTrendChart from '../../components/CustomerTrendChart';
 import AverageOrderValueChart from '../../components/AverageOrderValueChart';
 import OrdersByFulfillmentStatusChart from '../../components/OrdersByFulfillmentStatusChart';
 import TopProductsTable from '../../components/TopProductsTable';
+import SyncButton from '../../components/SyncButton';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMetrics } from '../../hooks/useMetrics';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
-  const { metrics, isLoading, error } = useMetrics();
+  const { metrics, isLoading, error, refresh } = useMetrics();
+
+  // Handle sync completion - refresh all data
+  const handleSyncComplete = () => {
+    refresh();
+  };
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -58,13 +64,16 @@ export default function DashboardPage() {
         </nav>
 
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Dashboard Overview
-            </h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Key metrics for your Shopify store
-            </p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Dashboard Overview
+              </h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Key metrics for your Shopify store
+              </p>
+            </div>
+            <SyncButton onSyncComplete={handleSyncComplete} />
           </div>
 
           {/* Metrics Cards Grid */}

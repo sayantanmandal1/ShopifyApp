@@ -96,6 +96,15 @@ export default function LoginPage() {
               create a new account
             </a>
           </p>
+          <p className="mt-1 text-center text-xs text-gray-500">
+            New store?{' '}
+            <a
+              href="/onboard"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              Onboard your Shopify store
+            </a>
+          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="-space-y-px rounded-md shadow-sm">

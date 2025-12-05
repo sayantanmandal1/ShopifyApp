@@ -21,6 +21,16 @@ export default function RegisterPage() {
     }
   }, [isAuthenticated, router]);
 
+  // Pre-fill tenant ID if coming from onboarding
+  useEffect(() => {
+    const pendingTenantId = localStorage.getItem('pendingTenantId');
+    if (pendingTenantId) {
+      setTenantId(pendingTenantId);
+      // Clear it after using
+      localStorage.removeItem('pendingTenantId');
+    }
+  }, []);
+
   const validateForm = (): boolean => {
     if (!email || !password || !confirmPassword || !tenantId) {
       setError('All fields are required');
