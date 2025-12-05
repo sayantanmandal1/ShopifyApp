@@ -24,7 +24,7 @@ app.use(cors({ origin: config.frontendUrl, credentials: true }));
 app.use(
   '/api/webhooks',
   express.raw({ type: 'application/json' }),
-  (req, res, next) => {
+  (req, _res, next) => {
     // Store raw body and parse JSON manually
     if (req.body && Buffer.isBuffer(req.body)) {
       (req as any).rawBody = req.body.toString('utf8');

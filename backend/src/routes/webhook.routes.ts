@@ -77,7 +77,7 @@ router.post('/cart-abandoned', async (req: Request, res: Response) => {
  * POST /api/webhooks/checkout-started
  * Handle checkout started webhook from Shopify
  */
-router.post('/checkout-started', async (req: Request, res: Response): Promise<void> => {
+router.post('/checkout-started', async (req: Request, res: Response) => {
   const startTime = Date.now();
 
   try {
@@ -88,18 +88,21 @@ router.post('/checkout-started', async (req: Request, res: Response): Promise<vo
 
     if (!signature) {
       logger.warn('Checkout started webhook received without signature');
-      return res.status(401).json({ error: 'Missing signature' });
+      res.status(401).json({ error: 'Missing signature' });
+      return;
     }
 
     if (!shopDomainHeader) {
       logger.warn('Checkout started webhook received without shop domain');
-      return res.status(400).json({ error: 'Missing shop domain' });
+      res.status(400).json({ error: 'Missing shop domain' });
+      return;
     }
 
     const shopDomain = extractShopDomain(shopDomainHeader);
     if (!shopDomain) {
       logger.warn('Checkout started webhook received with invalid shop domain');
-      return res.status(400).json({ error: 'Invalid shop domain' });
+      res.status(400).json({ error: 'Invalid shop domain' });
+      return;
     }
 
     // Verify webhook authenticity
@@ -111,7 +114,8 @@ router.post('/checkout-started', async (req: Request, res: Response): Promise<vo
 
     if (!verification.isValid) {
       logger.error(`Checkout started webhook verification failed: ${verification.error}`);
-      return res.status(401).json({ error: 'Invalid webhook signature' });
+      res.status(401).json({ error: 'Invalid webhook signature' });
+      return;
     }
 
     // Handle the checkout started event
