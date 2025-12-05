@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
+import path from 'path';
 
-// Load environment variables
-dotenv.config({ path: '../.env' });
+// Load environment variables from root .env file
+dotenv.config({ path: path.resolve(__dirname, '../../..', '.env') });
 
 interface Config {
   nodeEnv: string;
