@@ -2,6 +2,7 @@
 
 import ProtectedRoute from '../../components/ProtectedRoute';
 import MetricCard from '../../components/MetricCard';
+import OrdersChart from '../../components/OrdersChart';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMetrics } from '../../hooks/useMetrics';
 
