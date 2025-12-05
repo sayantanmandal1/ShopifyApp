@@ -1,16 +1,25 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [tenantId, setTenantId] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
 
   const validateForm = (): boolean => {
     if (!email || !password || !confirmPassword || !tenantId) {
@@ -62,10 +71,9 @@ export default function RegisterPage() {
         throw new Error(data.error || data.details?.[0] || 'Registration failed');
       }
 
-      // Store JWT token in localStorage
-      if (data.data?.token) {
-        localStorage.setItem('authToken', data.data.token);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
+      // Use AuthContext to store authentication
+      if (data.data?.token && data.data?.user) {
+        login(data.data.token, data.data.user);
         
         // Redirect to dashboard on success
         router.push('/dashboard');
