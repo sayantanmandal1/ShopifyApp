@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const [tenantId, setTenantId] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showTenantIdField, setShowTenantIdField] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -21,19 +22,25 @@ export default function RegisterPage() {
     }
   }, [isAuthenticated, router]);
 
-  // Pre-fill tenant ID if coming from onboarding
+  // Pre-fill tenant ID if coming from onboarding or check if user has one
   useEffect(() => {
     const pendingTenantId = localStorage.getItem('pendingTenantId');
     if (pendingTenantId) {
       setTenantId(pendingTenantId);
+      setShowTenantIdField(true);
       // Clear it after using
       localStorage.removeItem('pendingTenantId');
     }
   }, []);
 
   const validateForm = (): boolean => {
-    if (!email || !password || !confirmPassword || !tenantId) {
+    if (!email || !password || !confirmPassword) {
       setError('All fields are required');
+      return false;
+    }
+
+    if (showTenantIdField && !tenantId) {
+      setError('Tenant ID is required');
       return false;
     }
 
@@ -51,6 +58,15 @@ export default function RegisterPage() {
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return false;
+    }
+
+    // Validate UUID format if tenant ID is provided
+    if (showTenantIdField && tenantId) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(tenantId)) {
+        setError('Invalid Tenant ID format. Please use the onboarding page to create a new account.');
+        return false;
+      }
     }
 
     return true;
