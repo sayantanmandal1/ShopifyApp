@@ -6,6 +6,8 @@ import { config } from './config';
 import { logger } from './utils/logger';
 import authRoutes from './routes/auth.routes';
 import tenantRoutes from './routes/tenant.routes';
+import ingestionRoutes from './routes/ingestion.routes';
+import webhookRoutes from './routes/webhook.routes';
 import { authenticate } from './middleware/auth.middleware';
 
 // Load environment variables
@@ -16,6 +18,28 @@ const app: Application = express();
 // Middleware
 app.use(helmet());
 app.use(cors({ origin: config.frontendUrl, credentials: true }));
+
+// Webhook routes need raw body for signature verification
+// Must be registered before express.json() middleware
+app.use(
+  '/api/webhooks',
+  express.raw({ type: 'application/json' }),
+  (req, res, next) => {
+    // Store raw body and parse JSON manually
+    if (req.body && Buffer.isBuffer(req.body)) {
+      (req as any).rawBody = req.body.toString('utf8');
+      try {
+        req.body = JSON.parse((req as any).rawBody);
+      } catch (error) {
+        req.body = {};
+      }
+    }
+    next();
+  },
+  webhookRoutes
+);
+
+// Standard JSON parsing for other routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -29,6 +53,11 @@ app.use('/api/auth', authRoutes);
 
 // Tenant routes
 app.use('/api/tenants', tenantRoutes);
+
+// Ingestion routes (protected)
+app.use('/api/ingestion', ingestionRoutes);
+
+// Note: Webhook routes are registered above before JSON middleware
 
 // Protected routes example
 app.get('/api/protected', authenticate, (_req, res) => {

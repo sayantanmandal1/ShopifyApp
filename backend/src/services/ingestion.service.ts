@@ -116,11 +116,11 @@ export class IngestionService {
     }
   }
 
-  async ingestOrders(tenantId: string): Promise<IngestionResult> {
+  async ingestOrders(_tenantId: string): Promise<IngestionResult> {
     throw new Error('Not implemented yet');
   }
 
-  async ingestProducts(tenantId: string): Promise<IngestionResult> {
+  async ingestProducts(_tenantId: string): Promise<IngestionResult> {
     throw new Error('Not implemented yet');
   }
 }
