@@ -56,9 +56,9 @@ export default function CustomerTrendChart() {
   };
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="rounded-lg bg-white p-4 sm:p-6 shadow">
+      <div className="mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
           Customer Acquisition Trend
         </h3>
         <DateRangePicker
@@ -71,51 +71,56 @@ export default function CustomerTrendChart() {
       </div>
 
       {isLoading && (
-        <div className="flex items-center justify-center h-80">
-          <div className="text-gray-500">Loading chart data...</div>
+        <div className="flex items-center justify-center h-64 sm:h-80">
+          <div className="text-sm sm:text-base text-gray-500">Loading chart data...</div>
         </div>
       )}
 
       {error && (
-        <div className="flex items-center justify-center h-80">
-          <div className="text-red-500">Error: {error}</div>
+        <div className="flex items-center justify-center h-64 sm:h-80">
+          <div className="text-sm sm:text-base text-red-500">Error: {error}</div>
         </div>
       )}
 
       {!isLoading && !error && customerTrend && customerTrend.length === 0 && (
-        <div className="flex items-center justify-center h-80">
-          <div className="text-gray-500">No customer data available</div>
+        <div className="flex items-center justify-center h-64 sm:h-80">
+          <div className="text-sm sm:text-base text-gray-500">No customer data available</div>
         </div>
       )}
 
       {!isLoading && !error && customerTrend && customerTrend.length > 0 && (
-        <ResponsiveContainer width="100%" height={400}>
-          <LineChart
-            data={customerTrend}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              tickFormatter={formatDate}
-              angle={-45}
-              textAnchor="end"
-              height={80}
-            />
-            <YAxis />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              name="New Customers"
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="w-full overflow-x-auto">
+          <div className="min-w-[300px]">
+            <ResponsiveContainer width="100%" height={300} className="sm:!h-[400px]">
+              <LineChart
+                data={customerTrend}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={formatDate}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  name="New Customers"
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       )}
     </div>
   );

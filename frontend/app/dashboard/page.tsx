@@ -40,21 +40,21 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-gray-50">
         <nav className="bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 justify-between">
+            <div className="flex h-16 justify-between items-center">
               <div className="flex">
                 <div className="flex shrink-0 items-center">
-                  <h1 className="text-xl font-bold text-gray-900">
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">
                     Shopify Insights
                   </h1>
                 </div>
               </div>
-              <div className="flex items-center">
-                <span className="text-sm text-gray-700 mr-4">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <span className="text-xs sm:text-sm text-gray-700 hidden sm:inline truncate max-w-[150px] md:max-w-none">
                   {user?.email}
                 </span>
                 <button
                   onClick={logout}
-                  className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                  className="rounded-md bg-white px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
                   Sign out
                 </button>
@@ -63,13 +63,13 @@ export default function DashboardPage() {
           </div>
         </nav>
 
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="mb-8 flex justify-between items-start">
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
+          <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Dashboard Overview
               </h2>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-xs sm:text-sm text-gray-600">
                 Key metrics for your Shopify store
               </p>
             </div>
@@ -77,7 +77,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Metrics Cards Grid */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-6 sm:mb-8">
             <MetricCard
               title="Total Customers"
               value={metrics ? formatNumber(metrics.totalCustomers) : '0'}
@@ -149,18 +149,18 @@ export default function DashboardPage() {
           <OrdersChart />
 
           {/* Trend Charts Grid */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2 mt-6 sm:mt-8">
             <RevenueTrendChart />
             <CustomerTrendChart />
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2 mt-6 sm:mt-8">
             <AverageOrderValueChart />
             <OrdersByFulfillmentStatusChart />
           </div>
 
           {/* Tables Grid */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2 mt-6 sm:mt-8">
             <TopCustomersTable />
             <TopProductsTable />
           </div>

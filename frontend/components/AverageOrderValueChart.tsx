@@ -64,9 +64,9 @@ export default function AverageOrderValueChart() {
   };
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="rounded-lg bg-white p-4 sm:p-6 shadow">
+      <div className="mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
           Average Order Value Trend
         </h3>
         <DateRangePicker
@@ -79,51 +79,56 @@ export default function AverageOrderValueChart() {
       </div>
 
       {isLoading && (
-        <div className="flex items-center justify-center h-80">
-          <div className="text-gray-500">Loading chart data...</div>
+        <div className="flex items-center justify-center h-64 sm:h-80">
+          <div className="text-sm sm:text-base text-gray-500">Loading chart data...</div>
         </div>
       )}
 
       {error && (
-        <div className="flex items-center justify-center h-80">
-          <div className="text-red-500">Error: {error}</div>
+        <div className="flex items-center justify-center h-64 sm:h-80">
+          <div className="text-sm sm:text-base text-red-500">Error: {error}</div>
         </div>
       )}
 
       {!isLoading && !error && aovTrend && aovTrend.length === 0 && (
-        <div className="flex items-center justify-center h-80">
-          <div className="text-gray-500">No order data available</div>
+        <div className="flex items-center justify-center h-64 sm:h-80">
+          <div className="text-sm sm:text-base text-gray-500">No order data available</div>
         </div>
       )}
 
       {!isLoading && !error && aovTrend && aovTrend.length > 0 && (
-        <ResponsiveContainer width="100%" height={400}>
-          <LineChart
-            data={aovTrend}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              tickFormatter={formatDate}
-              angle={-45}
-              textAnchor="end"
-              height={80}
-            />
-            <YAxis tickFormatter={(value) => `$${value.toFixed(0)}`} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="#9333ea"
-              strokeWidth={2}
-              name="Avg Order Value"
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="w-full overflow-x-auto">
+          <div className="min-w-[300px]">
+            <ResponsiveContainer width="100%" height={300} className="sm:!h-[400px]">
+              <LineChart
+                data={aovTrend}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={formatDate}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis tickFormatter={(value) => `${value.toFixed(0)}`} tick={{ fontSize: 12 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#9333ea"
+                  strokeWidth={2}
+                  name="Avg Order Value"
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       )}
     </div>
   );
