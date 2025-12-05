@@ -14,7 +14,7 @@ const router = Router();
  * POST /api/webhooks/cart-abandoned
  * Handle cart abandoned webhook from Shopify
  */
-router.post('/cart-abandoned', async (req: Request, res: Response): Promise<void> => {
+router.post('/cart-abandoned', async (req: Request, res: Response) => {
   const startTime = Date.now();
 
   try {
@@ -25,18 +25,21 @@ router.post('/cart-abandoned', async (req: Request, res: Response): Promise<void
 
     if (!signature) {
       logger.warn('Cart abandoned webhook received without signature');
-      return res.status(401).json({ error: 'Missing signature' });
+      res.status(401).json({ error: 'Missing signature' });
+      return;
     }
 
     if (!shopDomainHeader) {
       logger.warn('Cart abandoned webhook received without shop domain');
-      return res.status(400).json({ error: 'Missing shop domain' });
+      res.status(400).json({ error: 'Missing shop domain' });
+      return;
     }
 
     const shopDomain = extractShopDomain(shopDomainHeader);
     if (!shopDomain) {
       logger.warn('Cart abandoned webhook received with invalid shop domain');
-      return res.status(400).json({ error: 'Invalid shop domain' });
+      res.status(400).json({ error: 'Invalid shop domain' });
+      return;
     }
 
     // Verify webhook authenticity
@@ -48,7 +51,8 @@ router.post('/cart-abandoned', async (req: Request, res: Response): Promise<void
 
     if (!verification.isValid) {
       logger.error(`Cart abandoned webhook verification failed: ${verification.error}`);
-      return res.status(401).json({ error: 'Invalid webhook signature' });
+      res.status(401).json({ error: 'Invalid webhook signature' });
+      return;
     }
 
     // Handle the cart abandoned event
