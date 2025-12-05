@@ -94,7 +94,7 @@ export const config: Config = {
   redis: {
     host: getEnvVar('REDIS_HOST', 'localhost'),
     port: getEnvVarAsNumber('REDIS_PORT', 6379),
-    password: getEnvVar('REDIS_PASSWORD', ''),
+    password: process.env.REDIS_PASSWORD || '',
   },
   auth: {
     jwtSecret: getEnvVar('JWT_SECRET'),
