@@ -4,6 +4,11 @@ import ProtectedRoute from '../../components/ProtectedRoute';
 import MetricCard from '../../components/MetricCard';
 import OrdersChart from '../../components/OrdersChart';
 import TopCustomersTable from '../../components/TopCustomersTable';
+import RevenueTrendChart from '../../components/RevenueTrendChart';
+import CustomerTrendChart from '../../components/CustomerTrendChart';
+import AverageOrderValueChart from '../../components/AverageOrderValueChart';
+import OrdersByFulfillmentStatusChart from '../../components/OrdersByFulfillmentStatusChart';
+import TopProductsTable from '../../components/TopProductsTable';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMetrics } from '../../hooks/useMetrics';
 
@@ -134,9 +139,21 @@ export default function DashboardPage() {
           {/* Orders by Date Chart */}
           <OrdersChart />
 
-          {/* Top Customers Table */}
-          <div className="mt-8">
+          {/* Trend Charts Grid */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
+            <RevenueTrendChart />
+            <CustomerTrendChart />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
+            <AverageOrderValueChart />
+            <OrdersByFulfillmentStatusChart />
+          </div>
+
+          {/* Tables Grid */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
             <TopCustomersTable />
+            <TopProductsTable />
           </div>
         </main>
       </div>
