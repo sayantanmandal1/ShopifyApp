@@ -130,15 +130,8 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Placeholder for future charts */}
-          <div className="rounded-lg bg-white p-6 shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Charts and Analytics
-            </h3>
-            <p className="text-gray-600">
-              Additional charts and visualizations will be implemented in upcoming tasks.
-            </p>
-          </div>
+          {/* Orders by Date Chart */}
+          <OrdersChart />
         </main>
       </div>
     </ProtectedRoute>
