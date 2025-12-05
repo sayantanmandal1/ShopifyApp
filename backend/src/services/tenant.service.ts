@@ -2,6 +2,7 @@ import prisma from '../db/prisma';
 import { logger } from '../utils/logger';
 import { encrypt } from '../utils/encryption';
 import { ShopifyClient } from '../clients/shopify.client';
+import { ValidationError, ExternalAPIError } from '../middleware/error.middleware';
 
 export interface TenantRegistrationInput {
   shopDomain: string;
@@ -35,7 +36,7 @@ export class TenantService {
 
     if (existingTenant) {
       logger.warn(`Attempted to register duplicate tenant: ${normalizedDomain}`);
-      throw new Error('A tenant with this shop domain already exists');
+      throw new ValidationError('A tenant with this shop domain already exists', 'Duplicate shop domain');
     }
 
     // Validate Shopify credentials by making an API call
@@ -48,7 +49,10 @@ export class TenantService {
       await shopifyClient.validateCredentials();
     } catch (error: any) {
       logger.error(`Failed to validate Shopify credentials for ${normalizedDomain}: ${error.message}`);
-      throw new Error(`Shopify credential validation failed: ${error.message}`);
+      throw new ExternalAPIError(
+        `Shopify credential validation failed: ${error.message}`,
+        'Shopify API'
+      );
     }
 
     // Encrypt sensitive credentials before storing
