@@ -1,0 +1,142 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tenant {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shopDomain            String    @unique @map("shop_domain") @db.VarChar(255)
+  accessTokenEncrypted  String    @map("access_token_encrypted") @db.Text
+  apiKey                String?   @map("api_key") @db.VarChar(255)
+  apiSecretEncrypted    String?   @map("api_secret_encrypted") @db.Text
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  users                 User[]
+  customers             Customer[]
+  products              Product[]
+  orders                Order[]
+  events                Event[]
+
+  @@map("tenants")
+}
+
+model User {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+model Customer {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  shopifyCustomerId  BigInt   @map("shopify_customer_id")
+  email              String?  @db.VarChar(255)
+  firstName          String?  @map("first_name") @db.VarChar(255)
+  lastName           String?  @map("last_name") @db.VarChar(255)
+  totalSpent         Decimal  @default(0) @map("total_spent") @db.Decimal(10, 2)
+  ordersCount        Int      @default(0) @map("orders_count")
+  createdAt          DateTime @map("created_at") @db.Timestamp(6)
+  updatedAt          DateTime @map("updated_at") @db.Timestamp(6)
+
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders             Order[]
+  events             Event[]
+
+  @@unique([tenantId, shopifyCustomerId])
+  @@index([tenantId])
+  @@map("customers")
+}
+
+model Product {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  shopifyProductId  BigInt   @map("shopify_product_id")
+  title             String   @db.VarChar(500)
+  vendor            String?  @db.VarChar(255)
+  productType       String?  @map("product_type") @db.VarChar(255)
+  price             Decimal  @db.Decimal(10, 2)
+  createdAt         DateTime @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime @map("updated_at") @db.Timestamp(6)
+
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderLineItems    OrderLineItem[]
+
+  @@unique([tenantId, shopifyProductId])
+  @@index([tenantId])
+  @@map("products")
+}
+
+model Order {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  shopifyOrderId     BigInt   @map("shopify_order_id")
+  customerId         String?  @map("customer_id") @db.Uuid
+  orderNumber        String   @map("order_number") @db.VarChar(255)
+  totalPrice         Decimal  @map("total_price") @db.Decimal(10, 2)
+  subtotalPrice      Decimal  @map("subtotal_price") @db.Decimal(10, 2)
+  totalTax           Decimal  @map("total_tax") @db.Decimal(10, 2)
+  currency           String   @db.VarChar(10)
+  financialStatus    String   @map("financial_status") @db.VarChar(50)
+  fulfillmentStatus  String?  @map("fulfillment_status") @db.VarChar(50)
+  orderDate          DateTime @map("order_date") @db.Timestamp(6)
+  createdAt          DateTime @map("created_at") @db.Timestamp(6)
+  updatedAt          DateTime @map("updated_at") @db.Timestamp(6)
+
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer           Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  lineItems          OrderLineItem[]
+
+  @@unique([tenantId, shopifyOrderId])
+  @@index([tenantId])
+  @@index([tenantId, orderDate])
+  @@map("orders")
+}
+
+model OrderLineItem {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId           String   @map("order_id") @db.Uuid
+  productId         String?  @map("product_id") @db.Uuid
+  shopifyProductId  BigInt?  @map("shopify_product_id")
+  shopifyVariantId  BigInt?  @map("shopify_variant_id")
+  title             String   @db.VarChar(500)
+  quantity          Int
+  price             Decimal  @db.Decimal(10, 2)
+  createdAt         DateTime @map("created_at") @db.Timestamp(6)
+
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product           Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@map("order_line_items")
+}
+
+model Event {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  eventType      String   @map("event_type") @db.VarChar(100)
+  shopifyId      BigInt?  @map("shopify_id")
+  customerId     String?  @map("customer_id") @db.Uuid
+  payload        Json
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer       Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, eventType])
+  @@map("events")
+}
