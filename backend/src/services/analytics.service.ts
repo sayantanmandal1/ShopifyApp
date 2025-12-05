@@ -309,4 +309,145 @@ export class AnalyticsService {
 
     return result;
   }
+
+  /**
+   * Get average order value trend over time
+   * Requirements: 10.1, 10.2
+   */
+  async getAverageOrderValueTrend(
+    tenantId: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<TrendData[]> {
+    // Build where clause
+    const where: any = { tenantId };
+
+    if (startDate || endDate) {
+      where.orderDate = {};
+      if (startDate) {
+        where.orderDate.gte = startDate;
+      }
+      if (endDate) {
+        where.orderDate.lte = endDate;
+      }
+    }
+
+    // Fetch orders
+    const orders = await prisma.order.findMany({
+      where,
+      select: {
+        orderDate: true,
+        totalPrice: true,
+      },
+      orderBy: {
+        orderDate: 'asc',
+      },
+    });
+
+    // Group by date and calculate average
+    const groupedByDate = new Map<string, { sum: number; count: number }>();
+
+    for (const order of orders) {
+      const dateKey = order.orderDate.toISOString().split('T')[0];
+      const existing = groupedByDate.get(dateKey) || { sum: 0, count: 0 };
+      groupedByDate.set(dateKey, {
+        sum: existing.sum + Number(order.totalPrice),
+        count: existing.count + 1,
+      });
+    }
+
+    // Convert to array with averages
+    const result: TrendData[] = Array.from(groupedByDate.entries()).map(
+      ([date, data]) => ({
+        date,
+        value: data.count > 0 ? data.sum / data.count : 0,
+      })
+    );
+
+    return result;
+  }
+
+  /**
+   * Get orders grouped by fulfillment status
+   * Requirements: 10.1
+   */
+  async getOrdersByFulfillmentStatus(tenantId: string): Promise<
+    Array<{ status: string; count: number }>
+  > {
+    const orders = await prisma.order.groupBy({
+      by: ['fulfillmentStatus'],
+      where: { tenantId },
+      _count: {
+        id: true,
+      },
+    });
+
+    return orders.map((order) => ({
+      status: order.fulfillmentStatus || 'unfulfilled',
+      count: order._count.id,
+    }));
+  }
+
+  /**
+   * Get top products by revenue
+   * Requirements: 10.1
+   */
+  async getTopProductsByRevenue(
+    tenantId: string,
+    limit: number = 5
+  ): Promise<
+    Array<{ productId: string; productTitle: string; revenue: number }>
+  > {
+    // Get line items with product info
+    const lineItems = await prisma.orderLineItem.findMany({
+      where: {
+        order: {
+          tenantId,
+        },
+        productId: { not: null },
+      },
+      select: {
+        productId: true,
+        quantity: true,
+        price: true,
+        product: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+
+    // Calculate revenue per product
+    const productRevenue = new Map<string, { title: string; revenue: number }>();
+
+    for (const item of lineItems) {
+      if (!item.productId || !item.product) continue;
+
+      const revenue = Number(item.price) * item.quantity;
+      const existing = productRevenue.get(item.productId);
+
+      if (existing) {
+        existing.revenue += revenue;
+      } else {
+        productRevenue.set(item.productId, {
+          title: item.product.title,
+          revenue,
+        });
+      }
+    }
+
+    // Convert to array and sort
+    const result = Array.from(productRevenue.entries())
+      .map(([productId, data]) => ({
+        productId,
+        productTitle: data.title,
+        revenue: data.revenue,
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, limit);
+
+    return result;
+  }
 }

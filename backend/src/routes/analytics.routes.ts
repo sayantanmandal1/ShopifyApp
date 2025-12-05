@@ -252,4 +252,125 @@ router.get('/customer-trend', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /api/analytics/average-order-value-trend
+ * Get average order value trend over time with optional date range filtering
+ * Query params: startDate (ISO string), endDate (ISO string)
+ * Requirements: 10.1, 10.2
+ */
+router.get('/average-order-value-trend', async (req: Request, res: Response) => {
+  try {
+    const tenantId = req.user?.tenantId;
+
+    if (!tenantId) {
+      return res.status(401).json({
+        error: 'Authentication required',
+      });
+    }
+
+    // Parse optional date range parameters
+    const { startDate, endDate } = req.query;
+    
+    let parsedStartDate: Date | undefined;
+    let parsedEndDate: Date | undefined;
+
+    if (startDate && typeof startDate === 'string') {
+      parsedStartDate = new Date(startDate);
+      if (isNaN(parsedStartDate.getTime())) {
+        return res.status(400).json({
+          error: 'Validation failed',
+          details: ['Invalid startDate format. Use ISO 8601 format.'],
+        });
+      }
+    }
+
+    if (endDate && typeof endDate === 'string') {
+      parsedEndDate = new Date(endDate);
+      if (isNaN(parsedEndDate.getTime())) {
+        return res.status(400).json({
+          error: 'Validation failed',
+          details: ['Invalid endDate format. Use ISO 8601 format.'],
+        });
+      }
+    }
+
+    const aovTrend = await analyticsService.getAverageOrderValueTrend(
+      tenantId,
+      parsedStartDate,
+      parsedEndDate
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: aovTrend,
+    });
+  } catch (error: any) {
+    logger.error(`Get average order value trend error: ${error.message}`);
+    return res.status(500).json({
+      error: 'Failed to retrieve average order value trend',
+      details: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/analytics/orders-by-fulfillment-status
+ * Get orders grouped by fulfillment status
+ * Requirements: 10.1
+ */
+router.get('/orders-by-fulfillment-status', async (req: Request, res: Response) => {
+  try {
+    const tenantId = req.user?.tenantId;
+
+    if (!tenantId) {
+      return res.status(401).json({
+        error: 'Authentication required',
+      });
+    }
+
+    const ordersByStatus = await analyticsService.getOrdersByFulfillmentStatus(tenantId);
+
+    return res.status(200).json({
+      success: true,
+      data: ordersByStatus,
+    });
+  } catch (error: any) {
+    logger.error(`Get orders by fulfillment status error: ${error.message}`);
+    return res.status(500).json({
+      error: 'Failed to retrieve orders by fulfillment status',
+      details: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/analytics/top-products
+ * Get top products by revenue
+ * Requirements: 10.1
+ */
+router.get('/top-products', async (req: Request, res: Response) => {
+  try {
+    const tenantId = req.user?.tenantId;
+
+    if (!tenantId) {
+      return res.status(401).json({
+        error: 'Authentication required',
+      });
+    }
+
+    const topProducts = await analyticsService.getTopProductsByRevenue(tenantId, 5);
+
+    return res.status(200).json({
+      success: true,
+      data: topProducts,
+    });
+  } catch (error: any) {
+    logger.error(`Get top products error: ${error.message}`);
+    return res.status(500).json({
+      error: 'Failed to retrieve top products',
+      details: error.message,
+    });
+  }
+});
+
 export default router;

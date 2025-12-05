@@ -3,6 +3,7 @@
 import ProtectedRoute from '../../components/ProtectedRoute';
 import MetricCard from '../../components/MetricCard';
 import OrdersChart from '../../components/OrdersChart';
+import TopCustomersTable from '../../components/TopCustomersTable';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMetrics } from '../../hooks/useMetrics';
 
@@ -132,6 +133,11 @@ export default function DashboardPage() {
 
           {/* Orders by Date Chart */}
           <OrdersChart />
+
+          {/* Top Customers Table */}
+          <div className="mt-8">
+            <TopCustomersTable />
+          </div>
         </main>
       </div>
     </ProtectedRoute>
