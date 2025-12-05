@@ -1,16 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDataSync } from '../hooks/useDataSync';
+import { useSyncStatus } from '../hooks/useSyncStatus';
 
 interface SyncButtonProps {
   onSyncComplete?: () => void;
 }
 
 export default function SyncButton({ onSyncComplete }: SyncButtonProps) {
-  const { triggerSync, isLoading, error } = useDataSync();
+  const { triggerSync, isLoading, error, lastSyncTime, jobIds } = useDataSync();
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [trackingJobIds, setTrackingJobIds] = useState<string[]>([]);
+  
+  // Track job status when jobs are created
+  const { statuses, allCompleted, anyFailed } = useSyncStatus(
+    trackingJobIds,
+    trackingJobIds.length > 0
+  );
+
+  // Update tracking when new jobs are created
+  useEffect(() => {
+    if (jobIds.length > 0) {
+      setTrackingJobIds(jobIds);
+    }
+  }, [jobIds]);
+
+  // Clear tracking when all jobs complete
+  useEffect(() => {
+    if (allCompleted && trackingJobIds.length > 0) {
+      // Wait a bit before clearing to show final status
+      const timeout = setTimeout(() => {
+        setTrackingJobIds([]);
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [allCompleted, trackingJobIds.length]);
 
   const handleSync = async () => {
     setShowSuccess(false);
@@ -32,6 +58,20 @@ export default function SyncButton({ onSyncComplete }: SyncButtonProps) {
       // Hide error message after 5 seconds
       setTimeout(() => setShowError(false), 5000);
     }
+  };
+
+  // Format relative time
+  const formatRelativeTime = (date: Date) => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
   };
 
   return (
