@@ -8,7 +8,9 @@ import authRoutes from './routes/auth.routes';
 import tenantRoutes from './routes/tenant.routes';
 import ingestionRoutes from './routes/ingestion.routes';
 import webhookRoutes from './routes/webhook.routes';
+import analyticsRoutes from './routes/analytics.routes';
 import { authenticate } from './middleware/auth.middleware';
+import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 
 // Load environment variables
 dotenv.config({ path: '../.env' });
@@ -57,12 +59,21 @@ app.use('/api/tenants', tenantRoutes);
 // Ingestion routes (protected)
 app.use('/api/ingestion', ingestionRoutes);
 
+// Analytics routes (protected)
+app.use('/api/analytics', analyticsRoutes);
+
 // Note: Webhook routes are registered above before JSON middleware
 
 // Protected routes example
 app.get('/api/protected', authenticate, (_req, res) => {
   res.json({ message: 'This is a protected route', user: _req.user });
 });
+
+// 404 handler - must be after all routes
+app.use(notFoundHandler);
+
+// Global error handler - must be last
+app.use(errorHandler);
 
 // Start server
 const PORT = config.port;
