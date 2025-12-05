@@ -73,7 +73,7 @@ router.post('/cart-abandoned', async (req: Request, res: Response): Promise<void
  * POST /api/webhooks/checkout-started
  * Handle checkout started webhook from Shopify
  */
-router.post('/checkout-started', async (req: Request, res: Response) => {
+router.post('/checkout-started', async (req: Request, res: Response): Promise<void> => {
   const startTime = Date.now();
 
   try {
