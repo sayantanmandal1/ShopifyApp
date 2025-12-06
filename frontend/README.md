@@ -10,7 +10,7 @@ This frontend application implements a complete authentication system with the f
 - **Register Page** (`/register`): User registration with tenant ID
 - **Dashboard Page** (`/dashboard`): Protected dashboard (requires authentication)
 - **Home Page** (`/`): Redirects to login or dashboard based on auth status
-
+;
 ### Authentication Context
 
 The `AuthContext` provides global authentication state management:
